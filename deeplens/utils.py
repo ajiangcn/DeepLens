@@ -106,7 +106,8 @@ def add_timestamp(data: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dictionary with timestamp added
     """
-    data["timestamp"] = datetime.utcnow().isoformat()
+    from datetime import timezone
+    data["timestamp"] = datetime.now(timezone.utc).isoformat()
     return data
 
 
@@ -129,7 +130,12 @@ def truncate_text(text: str, max_length: int = 100, suffix: str = "...") -> str:
 
 def extract_key_points(text: str, num_points: int = 5) -> List[str]:
     """
-    Extract key points from text (simple sentence splitting)
+    Extract key points from text using simple sentence splitting.
+    
+    Note: This uses basic period-based splitting and may incorrectly split
+    on abbreviations (e.g., "Dr."), decimals (e.g., "3.14"), or URLs.
+    For production use, consider using a proper sentence tokenizer like
+    NLTK or spaCy.
     
     Args:
         text: Text to extract from

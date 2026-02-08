@@ -3,6 +3,7 @@ Interactive CLI with Rich formatting for DeepLens
 """
 
 import asyncio
+import json
 from typing import Optional
 from rich.console import Console
 from rich.panel import Panel
@@ -165,13 +166,13 @@ Looking deeply beyond the surface of research hype
         except EOFError:
             pass
         
-        import json
         try:
             publications = json.loads("\n".join(lines))
             if isinstance(publications, dict) and 'publications' in publications:
                 publications = publications['publications']
         except json.JSONDecodeError as e:
             console.print(f"[red]❌ Invalid JSON: {e}[/red]")
+            return
             return
         
         with Progress(

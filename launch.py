@@ -110,9 +110,13 @@ Examples:
             from deeplens.interactive_cli import InteractiveCLI
             cli = InteractiveCLI(config)
             asyncio.run(cli.run())
-        else:
+        elif choice == "3":
             print("👋 Goodbye!")
             sys.exit(0)
+        else:
+            print(f"❌ Invalid choice: {choice}")
+            print("Please enter 1, 2, or 3")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

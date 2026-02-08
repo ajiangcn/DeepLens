@@ -64,6 +64,7 @@ class TestUtilities:
         """Test text truncation"""
         long_text = "a" * 200
         result = truncate_text(long_text, max_length=50)
+        # Result should be exactly max_length (47 chars + "..." = 50)
         assert len(result) == 50
         assert result.endswith("...")
 
