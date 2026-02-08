@@ -59,8 +59,7 @@ Provide:
         
         # Use base class method to invoke
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="translate_research"
+            prompt=prompt
         )
         
         return {
@@ -90,8 +89,7 @@ Provide:
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="explain_buzzword"
+            prompt=prompt
         )
         
         return {

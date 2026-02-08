@@ -96,8 +96,7 @@ Provide:
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="evaluate_researcher"
+            prompt=prompt
         )
         
         return {
@@ -140,8 +139,7 @@ Then provide an overall comparative analysis.
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="compare_researchers"
+            prompt=prompt
         )
         
         return {

@@ -97,8 +97,7 @@ Be brutally honest and contrarian. Call out hype.
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="assess_trend"
+            prompt=prompt
         )
         
         return {
@@ -139,8 +138,7 @@ Then rank them and provide an overall comparative analysis.
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="compare_trends"
+            prompt=prompt
         )
         
         return {
@@ -190,8 +188,7 @@ Look for signs of oversupply:
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="detect_oversupply"
+            prompt=prompt
         )
         
         return {

@@ -77,8 +77,7 @@ Provide:
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="analyze_research"
+            prompt=prompt
         )
         
         return {
@@ -110,8 +109,7 @@ For each level, explain what makes it different from the others.
 """
         
         result = await self.invoke_prompt(
-            prompt=prompt,
-            function_name="identify_hierarchy"
+            prompt=prompt
         )
         
         return {
