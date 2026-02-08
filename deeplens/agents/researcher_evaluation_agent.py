@@ -4,7 +4,7 @@ Researcher Evaluation Agent: Evaluates researcher patterns and strategies
 
 from typing import Dict, Any, List
 from enum import Enum
-from semantic_kernel.kernel import Kernel
+
 from ..base_agent import BaseAgent
 from ..registry import register_agent
 

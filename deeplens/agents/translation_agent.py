@@ -3,7 +3,6 @@ Translation Agent: Translates research buzzwords and papers into plain language
 """
 
 from typing import Dict, Any
-from semantic_kernel.kernel import Kernel
 from ..base_agent import BaseAgent
 from ..registry import register_agent
 

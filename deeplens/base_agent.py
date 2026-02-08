@@ -4,7 +4,7 @@ Base Agent: Abstract base class for all DeepLens agents
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
-from semantic_kernel.kernel import Kernel
+from .llm_provider import BaseLLMClient
 
 
 class BaseAgent(ABC):
@@ -13,15 +13,15 @@ class BaseAgent(ABC):
     Provides common functionality and enforces consistent interface.
     """
     
-    def __init__(self, kernel: Kernel, name: str = None):
+    def __init__(self, llm_client: BaseLLMClient, name: str = None):
         """
         Initialize the base agent
         
         Args:
-            kernel: Semantic Kernel instance
+            llm_client: LLM client instance for making API calls
             name: Agent name (defaults to class name)
         """
-        self.kernel = kernel
+        self.llm_client = llm_client
         self.name = name or self.__class__.__name__
         self.system_prompt = self._get_system_prompt()
     
@@ -39,32 +39,38 @@ class BaseAgent(ABC):
     async def invoke_prompt(
         self, 
         prompt: str,
-        function_name: str = "default",
-        plugin_name: str = None
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None
     ) -> str:
         """
         Common method to invoke LLM with a prompt
         
         Args:
             prompt: User prompt to send
-            function_name: Name of the function being called
-            plugin_name: Optional plugin name
+            temperature: Optional temperature override
+            max_tokens: Optional max tokens override
             
         Returns:
             LLM response as string
         """
-        plugin_name = plugin_name or self.name.lower()
-        full_prompt = self.system_prompt + "\n\n" + prompt
+        # Construct messages for chat completion
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": prompt}
+        ]
         
         try:
-            result = await self.kernel.invoke_prompt(
-                function_name=function_name,
-                plugin_name=plugin_name,
-                prompt=full_prompt
-            )
+            # Prepare kwargs
+            kwargs = {}
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            if max_tokens is not None:
+                kwargs["max_tokens"] = max_tokens
+            
+            result = await self.llm_client.chat_completion(messages, **kwargs)
             return str(result)
         except Exception as e:
-            return self._handle_error(e, function_name)
+            return self._handle_error(e, "invoke_prompt")
     
     def _handle_error(self, error: Exception, context: str = "") -> str:
         """

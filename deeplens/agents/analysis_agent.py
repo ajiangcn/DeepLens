@@ -4,7 +4,7 @@ Analysis Agent: Identifies fundamental problems, research stage, and industry de
 
 from typing import Dict, Any, List
 from enum import Enum
-from semantic_kernel.kernel import Kernel
+
 from ..base_agent import BaseAgent
 from ..registry import register_agent
 

@@ -6,10 +6,7 @@ import os
 from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 
-from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
-from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
-
+from .llm_provider import create_llm_client, LLMProvider, BaseLLMClient
 from .agents.translation_agent import TranslationAgent
 from .agents.analysis_agent import AnalysisAgent
 from .agents.researcher_evaluation_agent import ResearcherEvaluationAgent
@@ -29,65 +26,67 @@ class DeepLensOrchestrator:
     
     def __init__(
         self, 
-        api_key: Optional[str] = None,
+        provider: str = "openai",
         model: str = "gpt-4",
-        use_azure: bool = False
+        api_key: Optional[str] = None,
+        api_base: Optional[str] = None,
+        api_version: Optional[str] = None,
+        temperature: float = 0.7,
+        **kwargs
     ):
         """
         Initialize the DeepLens orchestrator
         
         Args:
-            api_key: OpenAI API key (or None to load from .env)
-            model: Model to use (default: gpt-4)
-            use_azure: Whether to use Azure OpenAI (NOT YET IMPLEMENTED - will raise NotImplementedError)
-        
-        Note:
-            Azure OpenAI support is planned but not yet implemented. Setting use_azure=True
-            will raise NotImplementedError. Use standard OpenAI for now.
+            provider: LLM provider (openai, azure_openai, anthropic, etc.)
+            model: Model identifier
+            api_key: API key (or None to load from .env)
+            api_base: Base URL for API (e.g., Azure endpoint)
+            api_version: API version (for Azure)
+            temperature: Sampling temperature
+            **kwargs: Additional provider-specific parameters
         """
         # Load environment variables
         load_dotenv()
         
-        # Set up API key
+        # Set up API key if not provided
         if api_key is None:
-            api_key = os.getenv("OPENAI_API_KEY")
+            provider_lower = provider.lower()
+            if provider_lower == "openai":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif provider_lower == "azure_openai":
+                api_key = os.getenv("AZURE_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY")
+                api_base = api_base or os.getenv("AZURE_API_BASE") or os.getenv("AZURE_OPENAI_ENDPOINT")
+                api_version = api_version or os.getenv("AZURE_API_VERSION") or os.getenv("AZURE_OPENAI_API_VERSION")
+            elif provider_lower == "anthropic":
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+            elif provider_lower == "gemini":
+                api_key = os.getenv("GEMINI_API_KEY")
+            elif provider_lower == "cohere":
+                api_key = os.getenv("COHERE_API_KEY")
+        
         if not api_key:
             raise ValueError(
-                "OpenAI API key not provided. Either pass api_key parameter "
-                "or set OPENAI_API_KEY environment variable."
+                f"API key not provided for {provider}. Either pass api_key parameter "
+                f"or set appropriate environment variable."
             )
         
-        # Initialize Semantic Kernel
-        self.kernel = Kernel()
+        # Create LLM client
+        self.llm_client = create_llm_client(
+            provider=provider,
+            model=model,
+            api_key=api_key,
+            api_base=api_base,
+            api_version=api_version,
+            temperature=temperature,
+            **kwargs
+        )
         
-        # Add chat completion service
-        if use_azure:
-            # Azure OpenAI configuration
-            endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-            deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
-            if not endpoint or not deployment:
-                raise ValueError(
-                    "Azure OpenAI requires AZURE_OPENAI_ENDPOINT and "
-                    "AZURE_OPENAI_DEPLOYMENT environment variables"
-                )
-            # Note: Azure setup would go here
-            raise NotImplementedError("Azure OpenAI support coming soon")
-        else:
-            # Standard OpenAI
-            service_id = "default"
-            self.kernel.add_service(
-                OpenAIChatCompletion(
-                    service_id=service_id,
-                    ai_model_id=model,
-                    api_key=api_key
-                )
-            )
-        
-        # Initialize agents
-        self.translation_agent = TranslationAgent(self.kernel)
-        self.analysis_agent = AnalysisAgent(self.kernel)
-        self.researcher_agent = ResearcherEvaluationAgent(self.kernel)
-        self.trend_agent = TrendAssessmentAgent(self.kernel)
+        # Initialize agents with the LLM client
+        self.translation_agent = TranslationAgent(self.llm_client)
+        self.analysis_agent = AnalysisAgent(self.llm_client)
+        self.researcher_agent = ResearcherEvaluationAgent(self.llm_client)
+        self.trend_agent = TrendAssessmentAgent(self.llm_client)
     
     async def analyze_research_paper(
         self, 
