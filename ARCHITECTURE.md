@@ -182,13 +182,14 @@ results = await orchestrator.comprehensive_analysis(
 )
 ```
 
-### Caching
-Currently not implemented, but could be added at:
-- Orchestrator level (cache common queries)
-- Kernel level (cache LLM responses)
-
 ### Rate Limiting
 Handled by Semantic Kernel and OpenAI client libraries
+
+### Future Enhancements
+Potential improvements for future versions:
+- **Caching**: Cache common queries at orchestrator or kernel level
+- **Batch Processing**: Process multiple requests in parallel
+- **Custom Models**: Support for other LLM providers
 
 ## Testing Strategy
 

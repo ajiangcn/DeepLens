@@ -201,7 +201,6 @@ class DeepLensOrchestrator:
             Complete analysis from all agents
         """
         results = {
-            "timestamp": None,  # Could add timestamp
             "analyses": {}
         }
         
