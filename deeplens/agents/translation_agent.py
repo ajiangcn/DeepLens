@@ -3,20 +3,21 @@ Translation Agent: Translates research buzzwords and papers into plain language
 """
 
 from typing import Dict, Any
-from semantic_kernel.agents import ChatCompletionAgent
-from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
 from semantic_kernel.kernel import Kernel
+from ..base_agent import BaseAgent
+from ..registry import register_agent
 
 
-class TranslationAgent:
+@register_agent("translation")
+class TranslationAgent(BaseAgent):
     """
     Agent specialized in translating technical research language into plain English.
     Breaks down complex buzzwords, jargon, and academic papers into accessible explanations.
     """
     
-    def __init__(self, kernel: Kernel):
-        self.kernel = kernel
-        self.system_prompt = """You are an expert at translating complex research papers and technical buzzwords into plain, accessible language.
+    def _get_system_prompt(self) -> str:
+        """Get the system prompt for translation agent"""
+        return """You are an expert at translating complex research papers and technical buzzwords into plain, accessible language.
 
 Your role is to:
 1. Identify and explain technical jargon and buzzwords
@@ -57,15 +58,14 @@ Provide:
 4. Helpful analogies or examples
 """
         
-        # Use kernel to execute the translation
-        result = await self.kernel.invoke_prompt(
-            function_name="translate_research",
-            plugin_name="translation",
-            prompt=self.system_prompt + "\n\n" + prompt
+        # Use base class method to invoke
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="translate_research"
         )
         
         return {
-            "simplified": str(result),
+            "simplified": result,
             "status": "success"
         }
     
@@ -90,14 +90,13 @@ Provide:
 5. A simple analogy
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="explain_buzzword",
-            plugin_name="translation",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="explain_buzzword"
         )
         
         return {
-            "explanation": str(result),
+            "explanation": result,
             "buzzword": buzzword,
             "status": "success"
         }
