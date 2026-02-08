@@ -1,0 +1,30 @@
+{
+  "researcher_name": "Dr. Jane Smith",
+  "publications": [
+    {
+      "year": 2018,
+      "title": "Deep Convolutional Networks for Image Classification",
+      "abstract": "We present a comprehensive study of deep convolutional neural networks applied to large-scale image classification tasks. Our architecture achieves competitive performance on ImageNet dataset with novel regularization techniques."
+    },
+    {
+      "year": 2019,
+      "title": "Attention Mechanisms in Neural Machine Translation",
+      "abstract": "We propose a novel attention-based architecture for neural machine translation that significantly improves translation quality. Our method learns to focus on relevant source tokens when generating each target token."
+    },
+    {
+      "year": 2020,
+      "title": "Few-Shot Learning with Meta-Learning",
+      "abstract": "We introduce a meta-learning approach for few-shot classification that learns to learn from limited examples. Our method achieves state-of-the-art results on miniImageNet and Omniglot benchmarks."
+    },
+    {
+      "year": 2021,
+      "title": "Graph Neural Networks for Molecular Property Prediction",
+      "abstract": "We apply graph neural networks to predict molecular properties with applications in drug discovery. Our approach learns representations that capture both local and global molecular structure."
+    },
+    {
+      "year": 2022,
+      "title": "Self-Supervised Learning for Vision Transformers",
+      "abstract": "We propose a self-supervised pretraining method specifically designed for vision transformers. Our approach leverages contrastive learning and masked image modeling to learn robust visual representations."
+    }
+  ]
+}
