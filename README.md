@@ -11,16 +11,25 @@ DeepLens is a multi-agent system built on the Microsoft Semantic Kernel framewor
 3. **Researcher Evaluation**: Evaluates a researcher's history to determine if they follow trends, go deep, or uplevel problem abstractions
 4. **Trend Assessment**: Assesses technical trends — predicting obsolescence, distinguishing hype from hard problems, and detecting oversupply
 
+## ✨ New Features (v0.2.0)
+
+- **🎨 Interactive Web UI**: Beautiful Gradio-based interface for easy interaction
+- **💻 Rich Interactive CLI**: Enhanced terminal interface with colors and formatting
+- **🔌 Extensible Architecture**: Easy-to-use plugin system for adding new agents
+- **⚙️ Configuration Management**: Centralized configuration with agent-specific settings
+- **🛡️ Better Error Handling**: Custom exceptions and improved error messages
+- **🧰 Utility Functions**: Common formatting and validation helpers
+
 ## Architecture
 
-DeepLens uses a multi-agent architecture with specialized agents:
+DeepLens uses a modular multi-agent architecture with specialized agents:
 
 - **TranslationAgent**: Simplifies research jargon and explains buzzwords
 - **AnalysisAgent**: Analyzes research to identify core problems and maturity
 - **ResearcherEvaluationAgent**: Evaluates researcher patterns (trend follower, deep specialist, abstraction upleveler)
 - **TrendAssessmentAgent**: Assesses trends, detects hype, and predicts obsolescence
 
-All agents are coordinated by the `DeepLensOrchestrator`.
+All agents inherit from `BaseAgent` and are managed by the `AgentRegistry`, coordinated by the `DeepLensOrchestrator`.
 
 ## Installation
 
@@ -40,6 +49,52 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env and add your OPENAI_API_KEY
 ```
+
+## Quick Start
+
+### Web UI (Recommended)
+
+Launch the interactive web interface:
+
+```bash
+python launch.py --ui
+```
+
+Or with a custom port:
+
+```bash
+python launch.py --ui --port 8080
+```
+
+The web UI provides:
+- 🌐 **Translate**: Simplify research text and explain buzzwords
+- 🔬 **Analyze**: Identify research stage and demand
+- 👨‍🔬 **Evaluate**: Assess researcher patterns
+- 📈 **Trends**: Detect hype and oversupply
+
+### Interactive CLI
+
+For terminal users, launch the interactive CLI:
+
+```bash
+python launch.py --cli
+```
+
+Features:
+- Rich formatted output with colors
+- Progress indicators
+- Interactive prompts
+- Easy command navigation
+
+### Simple Launcher
+
+Just run:
+
+```bash
+python launch.py
+```
+
+Choose your preferred interface from the menu.
 
 ## Usage
 
@@ -235,13 +290,55 @@ The system is optimized for researchers who want to:
 - Work on genuinely difficult challenges
 - See through academic and commercial hype
 
+## Extending DeepLens
+
+DeepLens is designed to be easily extensible. Add new agents in just a few lines:
+
+```python
+from deeplens.base_agent import BaseAgent
+from deeplens.registry import register_agent
+
+@register_agent("my_agent")
+class MyAgent(BaseAgent):
+    def _get_system_prompt(self) -> str:
+        return """You are an expert at [domain]..."""
+    
+    async def analyze(self, content: str):
+        result = await self.invoke_prompt(
+            prompt=f"Analyze: {content}",
+            function_name="analyze"
+        )
+        return {"result": result, "status": "success"}
+```
+
+See [EXTENDING.md](EXTENDING.md) for a complete guide on:
+- Creating new agents
+- Registering agents with the system
+- Adding UI components
+- Best practices for agent design
+
+## Documentation
+
+- **[README.md](README.md)** - Main documentation (this file)
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute getting started guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical architecture details
+- **[EXTENDING.md](EXTENDING.md)** - Guide to adding new agents
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+
 ## License
 
 MIT License
 
 ## Contributing
 
-Contributions welcome! Please open an issue or PR.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+To add a new agent:
+1. Read [EXTENDING.md](EXTENDING.md)
+2. Create your agent class inheriting from `BaseAgent`
+3. Register it with `@register_agent("name")`
+4. Add UI components and tests
+5. Submit a PR!
 
 ## Support
 
