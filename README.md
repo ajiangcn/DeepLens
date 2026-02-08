@@ -4,21 +4,23 @@ Looking deeply beyond the surface of research hype
 
 ## Overview
 
-DeepLens is a multi-agent system built on the Microsoft Semantic Kernel framework that helps researchers and practitioners cut through research hype and understand what's genuinely important. It provides four key capabilities:
+DeepLens is a multi-agent system built with flexible LLM provider support that helps researchers and practitioners cut through research hype and understand what's genuinely important. It provides four key capabilities:
 
 1. **Translation**: Translates research buzzwords and papers into plain language
 2. **Analysis**: Identifies fundamental problems, research stage (exploration/scaling/convergence), and industry demand
 3. **Researcher Evaluation**: Evaluates a researcher's history to determine if they follow trends, go deep, or uplevel problem abstractions
 4. **Trend Assessment**: Assesses technical trends — predicting obsolescence, distinguishing hype from hard problems, and detecting oversupply
 
-## ✨ New Features (v0.2.0)
+## ✨ Features (v0.3.0)
 
+- **🌐 Multi-Provider Support**: Works with OpenAI, Azure OpenAI, Anthropic, Google Gemini, Cohere, and more
 - **🎨 Interactive Web UI**: Beautiful Gradio-based interface for easy interaction
 - **💻 Rich Interactive CLI**: Enhanced terminal interface with colors and formatting
 - **🔌 Extensible Architecture**: Easy-to-use plugin system for adding new agents
 - **⚙️ Configuration Management**: Centralized configuration with agent-specific settings
 - **🛡️ Better Error Handling**: Custom exceptions and improved error messages
 - **🧰 Utility Functions**: Common formatting and validation helpers
+- **✅ Comprehensive Testing**: 92.6% test coverage for core modules
 
 ## Architecture
 
@@ -29,7 +31,7 @@ DeepLens uses a modular multi-agent architecture with specialized agents:
 - **ResearcherEvaluationAgent**: Evaluates researcher patterns (trend follower, deep specialist, abstraction upleveler)
 - **TrendAssessmentAgent**: Assesses trends, detects hype, and predicts obsolescence
 
-All agents inherit from `BaseAgent` and are managed by the `AgentRegistry`, coordinated by the `DeepLensOrchestrator`.
+All agents use a flexible LLM provider layer (via LiteLLM) that supports 100+ LLM providers, coordinated by the `DeepLensOrchestrator`.
 
 ## Installation
 
@@ -105,8 +107,35 @@ import asyncio
 from deeplens import DeepLensOrchestrator
 
 async def main():
-    # Initialize the orchestrator
-    orchestrator = DeepLensOrchestrator()
+    # Initialize with OpenAI (default)
+    orchestrator = DeepLensOrchestrator(
+        provider="openai",
+        model="gpt-4",
+        api_key="your-key"  # Or set OPENAI_API_KEY in .env
+    )
+    
+    # Or use Azure OpenAI
+    orchestrator = DeepLensOrchestrator(
+        provider="azure_openai",
+        model="gpt-35-turbo",
+        api_key="your-azure-key",
+        api_base="https://your-resource.openai.azure.com",
+        api_version="2023-05-15"
+    )
+    
+    # Or use Anthropic Claude
+    orchestrator = DeepLensOrchestrator(
+        provider="anthropic",
+        model="claude-3-opus",
+        api_key="your-anthropic-key"
+    )
+    
+    # Or use Google Gemini
+    orchestrator = DeepLensOrchestrator(
+        provider="gemini",
+        model="gemini-pro",
+        api_key="your-gemini-key"
+    )
     
     # Translate a buzzword
     result = await orchestrator.explain_buzzword("transformer architecture")
@@ -226,21 +255,51 @@ result = await orchestrator.detect_oversupply("BERT fine-tuning", recent_papers)
 
 ## Configuration
 
-DeepLens supports both OpenAI and Azure OpenAI:
+DeepLens uses LiteLLM to support 100+ LLM providers:
 
 ### OpenAI (Default)
 ```python
 orchestrator = DeepLensOrchestrator(
-    api_key="your-key",  # Or set OPENAI_API_KEY in .env
-    model="gpt-4"
+    provider="openai",
+    model="gpt-4",
+    api_key="your-key"  # Or set OPENAI_API_KEY in .env
 )
 ```
 
-### Azure OpenAI (Coming Soon)
+### Azure OpenAI
 ```python
 orchestrator = DeepLensOrchestrator(
-    use_azure=True
-    # Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_DEPLOYMENT in .env
+    provider="azure_openai",
+    model="gpt-35-turbo",  # Your deployment name
+    api_key="your-azure-key",
+    api_base="https://your-resource.openai.azure.com",
+    api_version="2023-05-15"
+)
+```
+
+### Anthropic Claude
+```python
+orchestrator = DeepLensOrchestrator(
+    provider="anthropic",
+    model="claude-3-opus",
+    api_key="your-anthropic-key"
+)
+```
+
+### Google Gemini & Others
+```python
+# Google Gemini
+orchestrator = DeepLensOrchestrator(
+    provider="gemini",
+    model="gemini-pro",
+    api_key="your-gemini-key"
+)
+
+# Cohere
+orchestrator = DeepLensOrchestrator(
+    provider="cohere",
+    model="command",
+    api_key="your-cohere-key"
 )
 ```
 
