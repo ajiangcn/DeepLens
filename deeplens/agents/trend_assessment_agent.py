@@ -5,6 +5,8 @@ Trend Assessment Agent: Evaluates technical trends and predictions
 from typing import Dict, Any, List
 from enum import Enum
 from semantic_kernel.kernel import Kernel
+from ..base_agent import BaseAgent
+from ..registry import register_agent
 
 
 class TrendStatus(str, Enum):
@@ -24,7 +26,8 @@ class ProblemType(str, Enum):
     FAKE_PROBLEM = "fake_problem"  # Not a real problem
 
 
-class TrendAssessmentAgent:
+@register_agent("trend")
+class TrendAssessmentAgent(BaseAgent):
     """
     Agent specialized in assessing technical trends:
     - Predicting obsolescence
@@ -33,9 +36,9 @@ class TrendAssessmentAgent:
     - Identifying genuinely difficult problems vs. engineering challenges
     """
     
-    def __init__(self, kernel: Kernel):
-        self.kernel = kernel
-        self.system_prompt = """You are an expert at assessing technical trends with a critical, long-term perspective.
+    def _get_system_prompt(self) -> str:
+        """Get the system prompt for trend assessment agent"""
+        return """You are an expert at assessing technical trends with a critical, long-term perspective.
 
 Your role is to:
 1. Predict which technologies/approaches will become obsolete and why
@@ -93,14 +96,13 @@ Provide:
 Be brutally honest and contrarian. Call out hype.
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="assess_trend",
-            plugin_name="trend_assessment",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="assess_trend"
         )
         
         return {
-            "assessment": str(result),
+            "assessment": result,
             "topic": topic,
             "status": "success"
         }
@@ -136,14 +138,13 @@ For each trend:
 Then rank them and provide an overall comparative analysis.
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="compare_trends",
-            plugin_name="trend_assessment",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="compare_trends"
         )
         
         return {
-            "comparison": str(result),
+            "comparison": result,
             "criteria": criteria,
             "trends": trends,
             "status": "success"
@@ -188,14 +189,13 @@ Look for signs of oversupply:
 - High submission rates but low innovation rates
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="detect_oversupply",
-            plugin_name="trend_assessment",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="detect_oversupply"
         )
         
         return {
-            "oversupply_analysis": str(result),
+            "oversupply_analysis": result,
             "research_area": research_area,
             "status": "success"
         }

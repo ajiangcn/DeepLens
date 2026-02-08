@@ -5,6 +5,8 @@ Analysis Agent: Identifies fundamental problems, research stage, and industry de
 from typing import Dict, Any, List
 from enum import Enum
 from semantic_kernel.kernel import Kernel
+from ..base_agent import BaseAgent
+from ..registry import register_agent
 
 
 class ResearchStage(str, Enum):
@@ -14,7 +16,8 @@ class ResearchStage(str, Enum):
     CONVERGENCE = "convergence"  # Mature field, incremental improvements
 
 
-class AnalysisAgent:
+@register_agent("analysis")
+class AnalysisAgent(BaseAgent):
     """
     Agent specialized in analyzing research to identify:
     - The fundamental problem being addressed
@@ -22,9 +25,9 @@ class AnalysisAgent:
     - Industry demand and practical applications
     """
     
-    def __init__(self, kernel: Kernel):
-        self.kernel = kernel
-        self.system_prompt = """You are an expert research analyst who identifies the core problems, research maturity, and real-world demand.
+    def _get_system_prompt(self) -> str:
+        """Get the system prompt for analysis agent"""
+        return """You are an expert research analyst who identifies the core problems, research maturity, and real-world demand.
 
 Your role is to:
 1. Identify the FUNDAMENTAL problem (not the surface-level claim)
@@ -73,14 +76,13 @@ Provide:
 6. Key Challenges: What are the main technical vs. engineering challenges?
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="analyze_research",
-            plugin_name="analysis",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="analyze_research"
         )
         
         return {
-            "analysis": str(result),
+            "analysis": result,
             "status": "success"
         }
     
@@ -107,13 +109,12 @@ List the problems from surface level to fundamental:
 For each level, explain what makes it different from the others.
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="identify_hierarchy",
-            plugin_name="analysis",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="identify_hierarchy"
         )
         
         return {
-            "hierarchy": str(result),
+            "hierarchy": result,
             "status": "success"
         }

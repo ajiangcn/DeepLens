@@ -5,6 +5,8 @@ Researcher Evaluation Agent: Evaluates researcher patterns and strategies
 from typing import Dict, Any, List
 from enum import Enum
 from semantic_kernel.kernel import Kernel
+from ..base_agent import BaseAgent
+from ..registry import register_agent
 
 
 class ResearcherPattern(str, Enum):
@@ -14,7 +16,8 @@ class ResearcherPattern(str, Enum):
     ABSTRACTION_UPLEVELER = "abstraction_upleveler"  # Works on higher-level problem abstractions
 
 
-class ResearcherEvaluationAgent:
+@register_agent("researcher")
+class ResearcherEvaluationAgent(BaseAgent):
     """
     Agent specialized in evaluating researcher history to determine their strategy:
     - Trend Follower: Jumps between hot topics
@@ -22,9 +25,9 @@ class ResearcherEvaluationAgent:
     - Abstraction Upleveler: Progressively tackles more fundamental problems
     """
     
-    def __init__(self, kernel: Kernel):
-        self.kernel = kernel
-        self.system_prompt = """You are an expert at analyzing researcher career patterns and strategies.
+    def _get_system_prompt(self) -> str:
+        """Get the system prompt for researcher evaluation agent"""
+        return """You are an expert at analyzing researcher career patterns and strategies.
 
 Your role is to identify whether a researcher:
 1. TREND FOLLOWER: Moves between hot topics, following what's popular
@@ -92,14 +95,13 @@ Provide:
 6. Topic Evolution: Describe the progression (or lack thereof) in topics
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="evaluate_researcher",
-            plugin_name="researcher_evaluation",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="evaluate_researcher"
         )
         
         return {
-            "evaluation": str(result),
+            "evaluation": result,
             "status": "success"
         }
     
@@ -137,13 +139,12 @@ For each researcher:
 Then provide an overall comparative analysis.
 """
         
-        result = await self.kernel.invoke_prompt(
-            function_name="compare_researchers",
-            plugin_name="researcher_evaluation",
-            prompt=self.system_prompt + "\n\n" + prompt
+        result = await self.invoke_prompt(
+            prompt=prompt,
+            function_name="compare_researchers"
         )
         
         return {
-            "comparison": str(result),
+            "comparison": result,
             "status": "success"
         }
