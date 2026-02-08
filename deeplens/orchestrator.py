@@ -39,7 +39,11 @@ class DeepLensOrchestrator:
         Args:
             api_key: OpenAI API key (or None to load from .env)
             model: Model to use (default: gpt-4)
-            use_azure: Whether to use Azure OpenAI
+            use_azure: Whether to use Azure OpenAI (NOT YET IMPLEMENTED - will raise NotImplementedError)
+        
+        Note:
+            Azure OpenAI support is planned but not yet implemented. Setting use_azure=True
+            will raise NotImplementedError. Use standard OpenAI for now.
         """
         # Load environment variables
         load_dotenv()
