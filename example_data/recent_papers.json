@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Fine-tuning BERT for Sentiment Analysis in Low-Resource Domains",
+    "year": 2023
+  },
+  {
+    "title": "Improving BERT Performance with Domain-Specific Pretraining",
+    "year": 2023
+  },
+  {
+    "title": "BERT-based Models for Multi-Label Text Classification",
+    "year": 2023
+  },
+  {
+    "title": "Efficient Fine-tuning of BERT with Adapter Layers",
+    "year": 2023
+  },
+  {
+    "title": "Cross-Lingual Transfer with Multilingual BERT",
+    "year": 2023
+  },
+  {
+    "title": "BERT for Named Entity Recognition: A Comparative Study",
+    "year": 2023
+  },
+  {
+    "title": "Optimizing BERT Fine-tuning Hyperparameters",
+    "year": 2023
+  },
+  {
+    "title": "BERT-based Question Answering Systems: A Survey",
+    "year": 2023
+  }
+]

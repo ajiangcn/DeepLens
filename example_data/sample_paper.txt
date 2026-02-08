@@ -1,0 +1,7 @@
+We propose a novel framework for neural architecture search using differentiable architecture search (DARTS). Our method enables efficient exploration of the architecture space by making the search space continuous, allowing gradient-based optimization. 
+
+Traditional neural architecture search methods rely on discrete search strategies that require training and evaluating thousands of candidate architectures, making them computationally prohibitive. In contrast, our approach represents the search space as a continuous relaxation where architectural decisions are parameterized by a set of continuous variables.
+
+We introduce a bilevel optimization problem where the architecture parameters and network weights are jointly optimized. The search phase involves optimizing architecture parameters on the validation set while updating network weights on the training set. This leads to architectures that generalize well.
+
+Our experiments on CIFAR-10 and ImageNet demonstrate that DARTS can discover competitive architectures in less than a day using a single GPU, orders of magnitude faster than previous methods. The discovered architectures achieve comparable or better performance than manually designed networks and other NAS methods, while requiring significantly less computational resources.
