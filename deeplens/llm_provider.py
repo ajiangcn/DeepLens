@@ -17,6 +17,26 @@ class LLMProvider(str, Enum):
     COHERE = "cohere"
 
 
+def _get_azure_ad_token() -> str:
+    """
+    Get an Azure AD token for Azure OpenAI using DefaultAzureCredential.
+    
+    This supports authentication via:
+    - Azure CLI (az login)
+    - Environment variables (AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_CLIENT_SECRET)
+    - Managed Identity
+    - Visual Studio Code credential
+    - And other methods in the DefaultAzureCredential chain
+    
+    Returns:
+        Bearer token string for Azure OpenAI
+    """
+    from azure.identity import DefaultAzureCredential
+    credential = DefaultAzureCredential()
+    token = credential.get_token("https://cognitiveservices.azure.com/.default")
+    return token.token
+
+
 class BaseLLMClient(ABC):
     """Abstract base class for LLM clients"""
     
@@ -47,7 +67,7 @@ class LiteLLMClient(BaseLLMClient):
     def __init__(
         self,
         provider: LLMProvider = LLMProvider.OPENAI,
-        model: str = "gpt-4",
+        model: str = "gpt-5.2-chat",
         api_key: Optional[str] = None,
         api_base: Optional[str] = None,
         api_version: Optional[str] = None,
@@ -61,7 +81,7 @@ class LiteLLMClient(BaseLLMClient):
         Args:
             provider: LLM provider to use
             model: Model name/identifier
-            api_key: API key for the provider
+            api_key: API key for the provider (not needed for Azure with DefaultAzureCredential)
             api_base: Base URL for API (e.g., Azure endpoint)
             api_version: API version (for Azure)
             temperature: Sampling temperature
@@ -82,15 +102,15 @@ class LiteLLMClient(BaseLLMClient):
     
     def _setup_environment(self):
         """Setup environment variables for LiteLLM"""
-        if self.api_key:
+        if self.provider == LLMProvider.AZURE_OPENAI:
+            # Azure OpenAI uses DefaultAzureCredential (no API key needed)
+            if self.api_base:
+                os.environ["AZURE_API_BASE"] = self.api_base
+            if self.api_version:
+                os.environ["AZURE_API_VERSION"] = self.api_version
+        elif self.api_key:
             if self.provider == LLMProvider.OPENAI:
                 os.environ["OPENAI_API_KEY"] = self.api_key
-            elif self.provider == LLMProvider.AZURE_OPENAI:
-                os.environ["AZURE_API_KEY"] = self.api_key
-                if self.api_base:
-                    os.environ["AZURE_API_BASE"] = self.api_base
-                if self.api_version:
-                    os.environ["AZURE_API_VERSION"] = self.api_version
             elif self.provider == LLMProvider.ANTHROPIC:
                 os.environ["ANTHROPIC_API_KEY"] = self.api_key
             elif self.provider == LLMProvider.GEMINI:
@@ -120,8 +140,24 @@ class LiteLLMClient(BaseLLMClient):
             params = {
                 "model": self._get_model_identifier(),
                 "messages": messages,
-                "temperature": kwargs.get("temperature", self.temperature),
             }
+            
+            # For Azure OpenAI, use DefaultAzureCredential token.
+            # Note: some Azure models (e.g. gpt-5.2-chat) do NOT support
+            # custom temperature — only the default (1.0) is allowed.
+            # We therefore skip temperature for Azure unless explicitly
+            # overridden by the caller.
+            if self.provider == LLMProvider.AZURE_OPENAI:
+                params["azure_ad_token"] = _get_azure_ad_token()
+                if self.api_base:
+                    params["api_base"] = self.api_base.rstrip("/")
+                if self.api_version:
+                    params["api_version"] = self.api_version
+                # Only send temperature if caller explicitly passes it
+                if "temperature" in kwargs:
+                    params["temperature"] = kwargs.pop("temperature")
+            else:
+                params["temperature"] = kwargs.pop("temperature", self.temperature)
             
             if self.max_tokens or kwargs.get("max_tokens"):
                 params["max_tokens"] = kwargs.get("max_tokens", self.max_tokens)
@@ -156,7 +192,7 @@ class LiteLLMClient(BaseLLMClient):
 
 def create_llm_client(
     provider: str = "openai",
-    model: str = "gpt-4",
+    model: str = "gpt-5.2-chat",
     api_key: Optional[str] = None,
     **kwargs
 ) -> BaseLLMClient:
@@ -166,7 +202,7 @@ def create_llm_client(
     Args:
         provider: Provider name (openai, azure_openai, anthropic, etc.)
         model: Model identifier
-        api_key: API key for provider
+        api_key: API key for provider (not needed for Azure with DefaultAzureCredential)
         **kwargs: Additional configuration
         
     Returns:

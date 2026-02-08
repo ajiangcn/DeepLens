@@ -46,15 +46,30 @@ When analyzing text:
                 - analogies: Helpful comparisons
         """
         prompt = f"""
-Analyze and translate the following research content into plain language:
+Analyze and translate the following research content into plain language.
+Format your response in well-structured Markdown.
 
+---
+CONTENT:
 {content}
+---
 
-Provide:
-1. A simplified explanation (2-3 paragraphs)
-2. Key technical terms with plain definitions
-3. The core idea in one sentence
-4. Helpful analogies or examples
+Respond with EXACTLY this structure:
+
+## TL;DR
+One sentence capturing the core idea.
+
+## What This Paper Does
+2-3 paragraphs explaining the work in plain, jargon-free language.
+Use analogies and everyday comparisons where helpful.
+
+## Key Terms Decoded
+| Term | Plain Meaning |
+|------|---------------|
+| ... | ... |
+
+## What's Actually New Here?
+Briefly explain what is genuinely novel vs. rebranded existing ideas.
 """
         
         # Use base class method to invoke

@@ -77,22 +77,42 @@ When analyzing researcher history:
         name_context = f" for researcher {researcher_name}" if researcher_name else ""
         
         prompt = f"""
-Analyze the following publication history{name_context}:
+Analyze the following publication history{name_context}.
+Format your response in well-structured Markdown.
 
+---
+PUBLICATIONS:
 {pubs_text}
+---
 
-Classify the researcher as:
-1. TREND FOLLOWER: Follows hot topics and trends
-2. DEEP SPECIALIST: Goes deep on specific problems
-3. ABSTRACTION UPLEVELER: Works on progressively more fundamental problems
+Respond with EXACTLY this structure:
 
-Provide:
-1. Primary Pattern: Which pattern best describes them?
-2. Confidence: How confident are you? (Low/Medium/High)
-3. Reasoning: Detailed explanation with specific examples
-4. Key Indicators: Concrete evidence from their work
-5. Trajectory: How has their work evolved?
-6. Topic Evolution: Describe the progression (or lack thereof) in topics
+## Researcher Pattern
+
+**Classification:** `Trend Follower` / `Deep Specialist` / `Abstraction Upleveler`
+**Confidence:** `High` / `Medium` / `Low`
+
+| Pattern | Description |
+|---------|-------------|
+| 🔴 Trend Follower | Jumps between hot topics following hype cycles |
+| 🔵 Deep Specialist | Sustained deep work on core problems |
+| 🟢 Abstraction Upleveler | Progressively tackles more fundamental problems |
+
+## Evidence & Reasoning
+Explain your classification with specific examples from the publication list.
+Use bullet points for clarity.
+
+## Topic Evolution
+Describe how the researcher's topics have changed over time.
+Highlight any patterns, pivots, or deepening threads.
+
+## Career Trajectory
+Summarize the overall arc — where they started, where they're heading,
+and what that signals about their research strategy.
+
+## Key Strengths & Blind Spots
+- **Strengths:** What this researcher does well
+- **Blind spots:** Gaps or risks in their approach
 """
         
         result = await self.invoke_prompt(

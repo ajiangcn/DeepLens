@@ -56,24 +56,26 @@ Examples:
     
     parser.add_argument(
         "--model",
-        default="gpt-4",
-        help="Model to use (default: gpt-4)"
+        default=None,
+        help="Model to use (default: from .env or gpt-4)"
     )
     
     args = parser.parse_args()
     
     # Load configuration
     config = DeepLensConfig.from_env()
-    config.model = args.model
+    if args.model:
+        config.model = args.model
     config.ui_port = args.port
     
-    # Validate API key
-    if not config.api_key:
-        print("❌ Error: OPENAI_API_KEY not found in environment")
-        print("\nPlease set your API key:")
-        print("  1. Copy .env.example to .env")
-        print("  2. Add your OpenAI API key to .env")
-        print("  3. Run this launcher again")
+    # Validate configuration
+    if not config.use_azure and not config.api_key:
+        print("❌ Error: No API credentials configured")
+        print("\nFor Azure OpenAI (DefaultAzureCredential):")
+        print("  Set USE_AZURE=true and AZURE_API_BASE in .env")
+        print("  Make sure you're logged in via 'az login'")
+        print("\nFor OpenAI:")
+        print("  Set OPENAI_API_KEY in .env")
         sys.exit(1)
     
     # Launch appropriate interface

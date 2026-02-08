@@ -63,17 +63,46 @@ When analyzing research:
             context_str = f"\n\nAdditional context: {context}"
         
         prompt = f"""
-Analyze the following research content:
+Analyze the following research content.
+Format your response in well-structured Markdown.
 
+---
+CONTENT:
 {content}{context_str}
+---
 
-Provide:
-1. Fundamental Problem: What is the REAL problem being solved? (Go beyond stated claims)
-2. Research Stage: Is this Exploration (new territory), Scaling (proven concept, needs efficiency), or Convergence (mature field, incremental gains)?
-3. Stage Reasoning: Why did you classify it this way?
-4. Industry Demand: Is there genuine industry pull, or speculative/academic interest?
-5. Demand Evidence: What evidence supports your demand assessment?
-6. Key Challenges: What are the main technical vs. engineering challenges?
+Respond with EXACTLY this structure:
+
+## Fundamental Problem
+What is the **real** problem being solved? Go beyond the paper's stated claims.
+
+## Research Stage
+
+**Classification:** `Exploration` / `Scaling` / `Convergence`
+
+| Stage | Description |
+|-------|-------------|
+| 🟡 Exploration | New problem space, early unknowns |
+| 🔵 Scaling | Proven concept, focus on efficiency & breadth |
+| 🟢 Convergence | Mature field, incremental improvements |
+
+**Reasoning:** Explain why you chose this stage with evidence from the paper.
+
+## Industry Demand
+
+**Demand Level:** `High` / `Medium` / `Low` / `Speculative`
+
+- **Evidence:** Concrete signals (products, adoption, funding, market pull).
+- **Gap Analysis:** What stands between research and real-world deployment?
+
+## Key Challenges
+
+| Challenge | Type | Notes |
+|-----------|------|-------|
+| ... | Technical / Engineering | ... |
+
+## Bottom Line
+One short paragraph: is this paper worth paying attention to, and who should care?
 """
         
         result = await self.invoke_prompt(

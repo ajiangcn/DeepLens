@@ -41,6 +41,10 @@ class DeepLensConfig:
     timeout: int = 60
     verbose: bool = False
     
+    # Azure-specific configuration
+    azure_api_base: Optional[str] = None
+    azure_api_version: Optional[str] = None
+    
     @classmethod
     def from_env(cls, env_file: str = ".env") -> "DeepLensConfig":
         """
@@ -54,10 +58,14 @@ class DeepLensConfig:
         """
         load_dotenv(env_file)
         
+        use_azure = os.getenv("USE_AZURE", "false").lower() == "true"
+        
         return cls(
             api_key=os.getenv("OPENAI_API_KEY"),
             model=os.getenv("OPENAI_MODEL", "gpt-4"),
-            use_azure=os.getenv("USE_AZURE", "false").lower() == "true",
+            use_azure=use_azure,
+            azure_api_base=os.getenv("AZURE_API_BASE") or os.getenv("AZURE_OPENAI_ENDPOINT"),
+            azure_api_version=os.getenv("AZURE_API_VERSION", "2024-12-01-preview"),
             temperature=float(os.getenv("TEMPERATURE", "0.7")),
             ui_port=int(os.getenv("UI_PORT", "7860")),
             verbose=os.getenv("VERBOSE", "false").lower() == "true",

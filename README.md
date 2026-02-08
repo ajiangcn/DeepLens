@@ -4,101 +4,77 @@ Looking deeply beyond the surface of research hype
 
 ## Overview
 
-DeepLens is a multi-agent system built with flexible LLM provider support that helps researchers and practitioners cut through research hype and understand what's genuinely important. It provides four key capabilities:
+DeepLens is a multi-agent system built with flexible LLM provider support that helps researchers and practitioners cut through research hype and understand what's genuinely important. It provides two core workflows:
 
-1. **Translation**: Translates research buzzwords and papers into plain language
-2. **Analysis**: Identifies fundamental problems, research stage (exploration/scaling/convergence), and industry demand
-3. **Researcher Evaluation**: Evaluates a researcher's history to determine if they follow trends, go deep, or uplevel problem abstractions
-4. **Trend Assessment**: Assesses technical trends — predicting obsolescence, distinguishing hype from hard problems, and detecting oversupply
+1. **Understand Paper** — paste a paper link (arXiv, DOI, Semantic Scholar, or any URL) and get a plain-language summary plus research-stage analysis
+2. **Evaluate Researcher** — paste a Google Scholar profile URL and get a classification of the researcher's strategy (trend follower, deep specialist, or abstraction upleveler)
 
-## ✨ Features (v0.3.0)
+## ✨ Features
 
-- **🌐 Multi-Provider Support**: Works with OpenAI, Azure OpenAI, Anthropic, Google Gemini, Cohere, and more
-- **🎨 Interactive Web UI**: Beautiful Gradio-based interface for easy interaction
-- **💻 Rich Interactive CLI**: Enhanced terminal interface with colors and formatting
-- **🔌 Extensible Architecture**: Easy-to-use plugin system for adding new agents
-- **⚙️ Configuration Management**: Centralized configuration with agent-specific settings
-- **🛡️ Better Error Handling**: Custom exceptions and improved error messages
-- **🧰 Utility Functions**: Common formatting and validation helpers
-- **✅ Comprehensive Testing**: 92.6% test coverage for core modules
-
-## Architecture
-
-DeepLens uses a modular multi-agent architecture with specialized agents:
-
-- **TranslationAgent**: Simplifies research jargon and explains buzzwords
-- **AnalysisAgent**: Analyzes research to identify core problems and maturity
-- **ResearcherEvaluationAgent**: Evaluates researcher patterns (trend follower, deep specialist, abstraction upleveler)
-- **TrendAssessmentAgent**: Assesses trends, detects hype, and predicts obsolescence
-
-All agents use a flexible LLM provider layer (via LiteLLM) that supports 100+ LLM providers, coordinated by the `DeepLensOrchestrator`.
+- **🔗 Link-Based Input**: Just paste a URL — no data wrangling required
+- **🌐 Multi-Provider Support**: Works with OpenAI, Azure OpenAI, Anthropic, Google Gemini, Cohere, and more via LiteLLM
+- **🎨 Interactive Web UI**: Clean two-tab Gradio interface
+- **💻 Rich Interactive CLI**: Terminal interface with rich formatting
+- **🔌 Extensible Architecture**: Plugin system for adding new agents
+- **🔐 Azure AD Auth**: DefaultAzureCredential for Azure OpenAI (no API keys)
 
 ## Installation
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/ajiangcn/DeepLens.git
 cd DeepLens
-```
-
-2. Install dependencies:
-```bash
 pip install -r requirements.txt
 ```
 
-3. Set up your OpenAI API key:
-```bash
-cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
+Set up your `.env` file:
+
+```env
+# For Azure OpenAI (recommended — uses DefaultAzureCredential, no API key needed)
+USE_AZURE=true
+AZURE_API_BASE=https://your-resource.cognitiveservices.azure.com/
+AZURE_API_VERSION=2024-12-01-preview
+OPENAI_MODEL=gpt-4
+
+# Or for vanilla OpenAI
+# OPENAI_API_KEY=sk-...
+# OPENAI_MODEL=gpt-4
 ```
 
 ## Quick Start
 
 ### Web UI (Recommended)
 
-Launch the interactive web interface:
-
 ```bash
 python launch.py --ui
 ```
 
-Or with a custom port:
-
-```bash
-python launch.py --ui --port 8080
-```
-
-The web UI provides:
-- 🌐 **Translate**: Simplify research text and explain buzzwords
-- 🔬 **Analyze**: Identify research stage and demand
-- 👨‍🔬 **Evaluate**: Assess researcher patterns
-- 📈 **Trends**: Detect hype and oversupply
+Two tabs:
+- **📄 Understand Paper** — paste a paper link or text
+- **👨‍🔬 Evaluate Researcher** — paste a Google Scholar profile URL
 
 ### Interactive CLI
-
-For terminal users, launch the interactive CLI:
 
 ```bash
 python launch.py --cli
 ```
 
-Features:
-- Rich formatted output with colors
-- Progress indicators
-- Interactive prompts
-- Easy command navigation
+Commands: `paper`, `researcher`, `help`, `exit`
 
-### Simple Launcher
-
-Just run:
+### Direct CLI
 
 ```bash
-python launch.py
+# Understand a paper from an arXiv link
+python main.py paper "https://arxiv.org/abs/2301.07041"
+
+# Understand a paper from a local file
+python main.py paper --file paper.txt
+
+# Evaluate a researcher from Google Scholar
+python main.py researcher "https://scholar.google.com/citations?user=XXXXXXXX"
+
+# JSON output
+python main.py --json paper "https://arxiv.org/abs/2301.07041"
 ```
-
-Choose your preferred interface from the menu.
-
-## Usage
 
 ### As a Python Library
 
@@ -107,233 +83,49 @@ import asyncio
 from deeplens import DeepLensOrchestrator
 
 async def main():
-    # Initialize with OpenAI (default)
-    orchestrator = DeepLensOrchestrator(
-        provider="openai",
-        model="gpt-4",
-        api_key="your-key"  # Or set OPENAI_API_KEY in .env
-    )
-    
-    # Or use Azure OpenAI
     orchestrator = DeepLensOrchestrator(
         provider="azure_openai",
-        model="gpt-35-turbo",
-        api_key="your-azure-key",
-        api_base="https://your-resource.openai.azure.com",
-        api_version="2023-05-15"
+        model="gpt-4",
+        api_base="https://your-resource.cognitiveservices.azure.com/",
+        api_version="2024-12-01-preview",
     )
     
-    # Or use Anthropic Claude
-    orchestrator = DeepLensOrchestrator(
-        provider="anthropic",
-        model="claude-3-opus",
-        api_key="your-anthropic-key"
+    # Workflow 1: Understand a paper
+    result = await orchestrator.understand_paper("https://arxiv.org/abs/2301.07041")
+    print(result["translation"]["simplified"])
+    print(result["analysis"]["analysis"])
+    
+    # Workflow 2: Evaluate a researcher
+    result = await orchestrator.evaluate_researcher_from_url(
+        "https://scholar.google.com/citations?user=XXXXXXXX"
     )
-    
-    # Or use Google Gemini
-    orchestrator = DeepLensOrchestrator(
-        provider="gemini",
-        model="gemini-pro",
-        api_key="your-gemini-key"
-    )
-    
-    # Translate a buzzword
-    result = await orchestrator.explain_buzzword("transformer architecture")
-    print(result['explanation'])
-    
-    # Analyze a research paper
-    paper = "We propose a novel approach to few-shot learning..."
-    result = await orchestrator.analyze_research_paper(paper)
-    print(result['translation']['simplified'])
-    print(result['analysis']['analysis'])
-    
-    # Evaluate a researcher
-    publications = [
-        {"year": 2020, "title": "Paper 1", "abstract": "..."},
-        {"year": 2021, "title": "Paper 2", "abstract": "..."}
-    ]
-    result = await orchestrator.evaluate_researcher(publications)
-    print(result['evaluation'])
-    
-    # Assess a trend
-    result = await orchestrator.assess_trend("Large Language Models")
-    print(result['assessment'])
+    print(result["name"], "—", result["evaluation"]["evaluation"])
 
 asyncio.run(main())
 ```
 
-### Command-Line Interface
+## Architecture
 
-```bash
-# Translate a buzzword
-python main.py translate --buzzword "transformer architecture"
+DeepLens uses a modular multi-agent system coordinated by the `DeepLensOrchestrator`.
+Users interact through **workflows** — the agents are internal implementation details:
 
-# Analyze a research paper
-python main.py analyze --file paper.txt
+| User Workflow | Internal Agents Used |
+|---|---|
+| Understand Paper | TranslationAgent → AnalysisAgent |
+| Evaluate Researcher | (scraper) → ResearcherEvaluationAgent |
 
-# Evaluate a researcher (requires JSON file with publications)
-python main.py evaluate --publications researcher.json
-
-# Assess a trend
-python main.py trend "Large Language Models"
-
-# Detect oversupply in a research area
-python main.py trend "BERT fine-tuning" --oversupply
-
-# Get JSON output
-python main.py translate "attention mechanism" --json
-```
-
-### Running Examples
-
-```bash
-python examples.py
-```
-
-This will run through examples of all four agents. Make sure you have set your `OPENAI_API_KEY` in the `.env` file first.
-
-## Agent Capabilities
-
-### 1. TranslationAgent
-
-Translates technical research language into plain English:
-- Identifies and explains technical jargon
-- Breaks down complex concepts
-- Provides analogies and examples
-- Distinguishes genuinely novel concepts from rebranded ideas
-
-**Example:**
-```python
-result = await orchestrator.explain_buzzword("attention mechanism")
-```
-
-### 2. AnalysisAgent
-
-Identifies core problems and research maturity:
-- Extracts fundamental problems (beyond surface claims)
-- Classifies research stage:
-  - **Exploration**: New problem space
-  - **Scaling**: Proven concept, needs efficiency
-  - **Convergence**: Mature field, incremental improvements
-- Assesses real industry demand vs. academic interest
-
-**Example:**
-```python
-result = await orchestrator.analyze_research_paper(paper_text)
-```
-
-### 3. ResearcherEvaluationAgent
-
-Evaluates researcher strategies:
-- **Trend Follower**: Jumps between hot topics
-- **Deep Specialist**: Sustained focus on core problems
-- **Abstraction Upleveler**: Progressively tackles more fundamental problems
-
-**Example:**
-```python
-publications = [
-    {"year": 2020, "title": "...", "abstract": "..."},
-    {"year": 2021, "title": "...", "abstract": "..."}
-]
-result = await orchestrator.evaluate_researcher(publications)
-```
-
-### 4. TrendAssessmentAgent
-
-Assesses technical trends with a critical lens:
-- Predicts obsolescence and timelines
-- Distinguishes hype from genuinely hard problems
-- Detects oversupply (too many researchers on similar problems)
-- Identifies fundamental vs. engineering challenges
-
-**Example:**
-```python
-result = await orchestrator.assess_trend("Large Language Models")
-# Or detect oversupply
-result = await orchestrator.detect_oversupply("BERT fine-tuning", recent_papers)
-```
+Key components:
+- `deeplens/scraper.py` — Fetches papers (arXiv, Semantic Scholar, DOI, generic) and Google Scholar profiles
+- `deeplens/orchestrator.py` — Maps user workflows to agent calls
+- `deeplens/agents/` — Specialized LLM agents (translation, analysis, researcher evaluation)
+- `deeplens/llm_provider.py` — LiteLLM-based provider with Azure AD token support
+- `specs/` — Speckit workflow specifications
 
 ## Configuration
 
-DeepLens uses LiteLLM to support 100+ LLM providers:
+DeepLens uses LiteLLM to support 100+ LLM providers. See `.env` for configuration.
 
-### OpenAI (Default)
-```python
-orchestrator = DeepLensOrchestrator(
-    provider="openai",
-    model="gpt-4",
-    api_key="your-key"  # Or set OPENAI_API_KEY in .env
-)
-```
-
-### Azure OpenAI
-```python
-orchestrator = DeepLensOrchestrator(
-    provider="azure_openai",
-    model="gpt-35-turbo",  # Your deployment name
-    api_key="your-azure-key",
-    api_base="https://your-resource.openai.azure.com",
-    api_version="2023-05-15"
-)
-```
-
-### Anthropic Claude
-```python
-orchestrator = DeepLensOrchestrator(
-    provider="anthropic",
-    model="claude-3-opus",
-    api_key="your-anthropic-key"
-)
-```
-
-### Google Gemini & Others
-```python
-# Google Gemini
-orchestrator = DeepLensOrchestrator(
-    provider="gemini",
-    model="gemini-pro",
-    api_key="your-gemini-key"
-)
-
-# Cohere
-orchestrator = DeepLensOrchestrator(
-    provider="cohere",
-    model="command",
-    api_key="your-cohere-key"
-)
-```
-
-## Input Formats
-
-### Researcher Publications JSON
-```json
-{
-  "researcher_name": "Dr. Example",
-  "publications": [
-    {
-      "year": 2020,
-      "title": "Paper Title",
-      "abstract": "Paper abstract..."
-    }
-  ]
-}
-```
-
-### Recent Papers JSON (for oversupply detection)
-```json
-[
-  {
-    "title": "Paper Title",
-    "year": 2023
-  }
-]
-```
-
-## Requirements
-
-- Python 3.8+
-- OpenAI API key (GPT-4 recommended)
-- See `requirements.txt` for Python package dependencies
+For Azure OpenAI, authentication is handled via `DefaultAzureCredential` (supports `az login`, managed identity, service principal, etc.) — no API key needed.
 
 ## Philosophy
 
@@ -341,64 +133,16 @@ DeepLens is designed with a contrarian, skeptical lens:
 - **Call out hype**: Distinguish marketing from substance
 - **Identify fundamentals**: Look past buzzwords to real problems
 - **Think long-term**: Predict what will matter in 5-10 years
-- **Be honest**: Acknowledge oversupply and diminishing returns
-
-The system is optimized for researchers who want to:
-- Understand what problems truly matter
-- Avoid crowded research areas
-- Work on genuinely difficult challenges
-- See through academic and commercial hype
-
-## Extending DeepLens
-
-DeepLens is designed to be easily extensible. Add new agents in just a few lines:
-
-```python
-from deeplens.base_agent import BaseAgent
-from deeplens.registry import register_agent
-
-@register_agent("my_agent")
-class MyAgent(BaseAgent):
-    def _get_system_prompt(self) -> str:
-        return """You are an expert at [domain]..."""
-    
-    async def analyze(self, content: str):
-        result = await self.invoke_prompt(
-            prompt=f"Analyze: {content}",
-            function_name="analyze"
-        )
-        return {"result": result, "status": "success"}
-```
-
-See [EXTENDING.md](EXTENDING.md) for a complete guide on:
-- Creating new agents
-- Registering agents with the system
-- Adding UI components
-- Best practices for agent design
+- **Just paste a link**: No data wrangling — the system handles fetching
 
 ## Documentation
 
-- **[README.md](README.md)** - Main documentation (this file)
-- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute getting started guide
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical architecture details
-- **[EXTENDING.md](EXTENDING.md)** - Guide to adding new agents
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- [QUICKSTART.md](QUICKSTART.md) — 5-minute getting started guide
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Technical architecture details
+- [EXTENDING.md](EXTENDING.md) — Guide to adding new agents
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution guidelines
+- [UI_GUIDE.md](UI_GUIDE.md) — Web UI guide
 
 ## License
 
 MIT License
-
-## Contributing
-
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-To add a new agent:
-1. Read [EXTENDING.md](EXTENDING.md)
-2. Create your agent class inheriting from `BaseAgent`
-3. Register it with `@register_agent("name")`
-4. Add UI components and tests
-5. Submit a PR!
-
-## Support
-
-For questions or issues, please open a GitHub issue.
