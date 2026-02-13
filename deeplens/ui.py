@@ -19,6 +19,9 @@ from deeplens.config import DeepLensConfig
 # Custom CSS
 # ---------------------------------------------------------------------------
 _CUSTOM_CSS = """
+* {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
 .paper-card {
     background: linear-gradient(135deg, #667eea11 0%, #764ba211 100%);
     border: 1px solid #e2e8f0;
